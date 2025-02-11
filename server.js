@@ -1,9 +1,31 @@
 const dotenv = require('dotenv');
 const express = require("express");
 const mysql = require('mysql2');
+const helmet = require('helmet');
+const cors = require('cors');
+const rateLimit = require('express-rate-limit');
 const app = express();
 const PORT = 3000;
 dotenv.config();
+
+// Helmet to secure HTTP headers
+app.use(helmet());
+
+// CORS to allow specific origins
+const corsOptions = {
+    origin: 'http://localhost:3000/',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+};
+app.use(cors(corsOptions));
+
+// Rate Limiting to prevent abuse (100 requests per 15 minutes)
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    message: 'Too many requests from this IP, please try again later.'
+});
+app.use(limiter);
 
 // Express Server
 app.get('/', (req, res) => {
